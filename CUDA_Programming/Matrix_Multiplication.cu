@@ -6,11 +6,11 @@
 #include <stdlib.h>
 
 // Size of matrix A
-#define AW 256
+#define AW 1024
 #define AH 256
 // Size of matrix B
 #define BW 256
-#define BH 256
+#define BH 1024
 
 #define BLOCKSIZE 16
 
@@ -34,8 +34,8 @@ __global__ void matrix_mul(matrix c, const matrix a, const matrix b)
 	{
 		Asub[row][col] = a.elements[(blockIdx.x *  BLOCKSIZE + row) + (i * BLOCKSIZE + col)];
 		Bsub[row][col] = b.elements[(i * BLOCKSIZE + row) + (blockIdx.y * BLOCKSIZE + col)];
-		Asub[row][col] = a.elements[tid_r * a.width + (i * BLOCKSIZE + col)];
-		Bsub[row][col] = b.elements[(i * BLOCKSIZE + row) * b.width + tid_c];
+		//Asub[row][col] = a.elements[tid_r * a.width + (i * BLOCKSIZE + col)];
+		//Bsub[row][col] = b.elements[(i * BLOCKSIZE + row) * b.width + tid_c];
 		__syncthreads();
 		for (int e = 0; e < BLOCKSIZE; ++e)
 			Cvalue += Asub[row][e] * Bsub[e][col];
@@ -48,7 +48,7 @@ int main()
 {
 	matrix a, b, c;
 	matrix dev_a, dev_b, dev_c;
-
+	FILE *fp = fopen("result.txt", "w");
 	// Allocate memory for Matrices a, b and c on CPU
 	a.elements = (int*)malloc(AH * AW * sizeof(int));
 	b.elements = (int*)malloc(BH * BW * sizeof(int));
@@ -85,9 +85,9 @@ int main()
 	{
 		for (int j = 0; j < c.width; ++j)
 		{
-			printf("%d ", c.elements[i * c.width + j]);
+			fprintf(fp, "%d ", c.elements[i * c.width + j]);
 		}
-		printf("\n");
+		fprintf(fp, "\n");
 	}
 
     return 0;
